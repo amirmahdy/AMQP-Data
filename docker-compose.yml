@@ -28,6 +28,14 @@ services:
       - POSTGRES_USER=mobility
       - POSTGRES_PASSWORD=al3o02928XCX2kx94SDAAs
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    ports: [ '127.0.0.1:5673:5672', '127.0.0.1:15673:15672' ]
+    environment:
+      RABBITMQ_DEFAULT_USER: mobility_user
+      RABBITMQ_DEFAULT_PASS: 4MiGMFxuv1jdZks0IjIkpAWq5
+
   nginx:
     build: ./nginx
     container_name: mobility_nginx
@@ -39,6 +47,36 @@ services:
     depends_on:
       - web
 
+  redis:
+    image: redis:6-alpine
+    restart: unless-stopped
+    ports: [ '127.0.0.1:6379:6379' ]
+    volumes:
+      - ./redis_data:/var/lib/redis/data/
+
+  celery:
+    build: .
+    command: celery -A mobility worker -l info
+    volumes:
+      - ./celery/:/var/lib/celery/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=dbaa1_i7%*3r9-=z-+021z4r-!qeed@(-a_r31(g@k8jo8y3r27%m
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    depends_on:
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A mobility beat -l info
+    volumes:
+      - ./celery/:/var/lib/celery/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=dbaa1_i7%*3r9-=z-+021z4r-!qeed@(-a_r31(g@k8jo8y3r27%m
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+    depends_on:
+      - redis
 
 volumes:
   postgres_data:

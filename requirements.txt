@@ -3,3 +3,8 @@ django
 psycopg2-binary
 django-environ
 djangorestframework
+pika
+celery
+redis
+channels_redis
+django_redis
