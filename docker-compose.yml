@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: mobility_web
+    entrypoint: /app/docker/wsgi-entrypoint.sh
+    volumes:
+      - ./docker/backend:/app/docker
+      - ./app:/app/
+      - ./app/static:/app/static/
+      - ./app/media:/app/media/
+    expose:
+      - 8000
+    env_file:
+      - app/.env
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    container_name: mobility_db
+    ports: [ '127.0.0.1:5433:5432' ]
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=mobility
+      - POSTGRES_USER=mobility
+      - POSTGRES_PASSWORD=al3o02928XCX2kx94SDAAs
+
+  nginx:
+    build: ./nginx
+    container_name: mobility_nginx
+    volumes:
+      - ./app/static:/app/static/
+      - ./app/media:/app/media/
+    ports:
+      - 8008:80
+    depends_on:
+      - web
+
+
+volumes:
+  postgres_data:
+  staticfiles:
+  mediafiles:

@@ -1,0 +1,5 @@
+gunicorn
+django
+psycopg2-binary
+django-environ
+djangorestframework
