@@ -1,0 +1,118 @@
+<html>
+<head>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+
+</head>
+<body>
+<div id="graph"></div>
+<div class="container">
+    <div class="panel panel-primary">
+        <div class="panel-heading">Select a period to watch</div>
+        <div class="panel-body">
+            <form autocomplete="off" method="post" name="form" src="{% url 'simulator' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class='col-md-6'>
+                        <div class="form-group">
+                            <label class="control-label">Appointment Time</label>
+                            <div class='input-group date'>
+                                <input type='text' class="form-control" id='startDatePicker' name='startDatePicker'/>
+                                <span class="input-group-addon">
+                     <span class="glyphicon glyphicon-calendar"></span>
+                     </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='col-md-6'>
+                        <div class="form-group">
+                            <label class="control-label">Appointment Time</label>
+                            <div class='input-group date'>
+                                <input type='text' class="form-control" id='endDatePicker' name='endDatePicker'/>
+                                <span class="input-group-addon">
+                     <span class="glyphicon glyphicon-calendar"></span>
+                     </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="submit" class="btn btn-primary" value="Submit">
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/momentjs/2.14.1/moment.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datepicker.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+{% if alarm == True %}
+<script>alert("{{state}}")</script>
+{% endif %}
+
+<script>
+    $(function () {
+        $("#startDatePicker").datepicker({
+            dateFormat: 'yy-mm-dd',
+            changeMonth: true,
+            maxDate: '0',
+            onSelect: function (date) {
+
+                var selectedDate = new Date(date);
+                var msecsInADay = 86400000;
+                var endDate = new Date(selectedDate.getTime() + msecsInADay);
+                $("#endDatePicker").datepicker("option", "minDate", endDate);
+                $("#endDatePicker").datepicker("option", "maxDate", '0');
+
+            }
+        });
+
+        $("#endDatePicker").datepicker({
+            dateFormat: 'yy-mm-dd',
+            changeMonth: true
+        });
+    });
+</script>
+<script>
+    var data = {
+        "pv": {{ data }}
+    }
+
+    var options = {
+        chart: {renderTo: 'graph'},
+        xAxis: {type: 'datetime'},
+        series: [],
+        title: {
+            text: 'Mobility-house',
+            align: 'center',
+        },
+
+    };
+
+    var pv = {
+        name: 'PV',
+        data: []
+    };
+
+    $.each(data, function (key, value) {
+        $.each(value, function (k, v) {
+            pv.data.push(v);
+        });
+
+    });
+
+    options.series.push(pv);
+    var chart = new Highcharts.Chart(options);
+
+</script>
+</html>

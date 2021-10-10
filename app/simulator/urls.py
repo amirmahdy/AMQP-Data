@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-urlpatterns = [
+from simulator.views import Index
 
+urlpatterns = [
+    path('', Index.as_view(), name='simulator'),
 ]

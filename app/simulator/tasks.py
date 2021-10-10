@@ -49,23 +49,29 @@ class RabbitListener:
                 time.sleep(5)
 
         to_csv = ToCSV()
+        try:
+            def callback(ch, method, properties, body):
+                to_csv.write_to_csv(body.decode())
 
-        def callback(ch, method, properties, body):
-            to_csv.write_to_csv(body.decode())
-            print("%r" % body.decode())
-
-        self.channel.basic_consume(
-            queue="simulator", on_message_callback=callback, auto_ack=True
-        )
-        self.channel.start_consuming()
+            self.channel.basic_consume(
+                queue="simulator", on_message_callback=callback, auto_ack=True
+            )
+            self.channel.start_consuming()
+        except Exception as e:
+            time.sleep(5)
+            self.try_connection()
 
     def back_listener_instance(self):
         t1 = Thread(target=self.back_listener)
         t1.start()
 
     def send_random_data(self):
-        rnd = random.randint(0, 9000)
-        self.channel.basic_publish(exchange='', routing_key='simulator', body=str(rnd).encode())
+        try:
+            rnd = random.randint(0, 9000)
+            self.channel.basic_publish(exchange='', routing_key='simulator', body=str(rnd).encode())
+        except Exception as e:
+            time.sleep(5)
+            self.try_connection()
 
 
 @celeryd_init.connect
