@@ -1,21 +1,7 @@
-version: '3.9'
+version: '3.3'
 
 services:
-  web:
-    build: .
-    container_name: mobility_web
-    entrypoint: /app/docker/wsgi-entrypoint.sh
-    volumes:
-      - ./docker/backend:/app/docker
-      - ./app:/app/
-      - ./app/static:/app/static/
-      - ./app/media:/app/media/
-    expose:
-      - 8000
-    env_file:
-      - app/.env
-    depends_on:
-      - db
+
 
   db:
     image: postgres
@@ -36,6 +22,22 @@ services:
       RABBITMQ_DEFAULT_USER: mobility_user
       RABBITMQ_DEFAULT_PASS: 4MiGMFxuv1jdZks0IjIkpAWq5
 
+  web:
+    build: .
+    container_name: mobility_web
+    entrypoint: /app/docker/wsgi-entrypoint.sh
+    volumes:
+      - ./docker/backend:/app/docker
+      - ./app:/app/
+      - ./app/static:/app/static/
+      - ./app/media:/app/media/
+    expose:
+      - 8000
+    env_file:
+      - app/.env
+    depends_on:
+      - db
+      - rabbitmq
   nginx:
     build: ./nginx
     container_name: mobility_nginx
@@ -65,6 +67,7 @@ services:
       - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
     depends_on:
       - redis
+      - rabbitmq
 
   celery-beat:
     build: .
@@ -77,6 +80,7 @@ services:
       - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
     depends_on:
       - redis
+      - rabbitmq
 
 volumes:
   postgres_data:
