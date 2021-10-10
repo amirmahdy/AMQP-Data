@@ -61,6 +61,7 @@ services:
     command: celery -A mobility worker -l info
     volumes:
       - ./celery/:/var/lib/celery/
+      - ./app/media:/app/media/
     environment:
       - DEBUG=1
       - SECRET_KEY=dbaa1_i7%*3r9-=z-+021z4r-!qeed@(-a_r31(g@k8jo8y3r27%m
@@ -74,6 +75,7 @@ services:
     command: celery -A mobility beat -l info
     volumes:
       - ./celery/:/var/lib/celery/
+      - ./app/media:/app/media/
     environment:
       - DEBUG=1
       - SECRET_KEY=dbaa1_i7%*3r9-=z-+021z4r-!qeed@(-a_r31(g@k8jo8y3r27%m

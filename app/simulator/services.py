@@ -18,7 +18,8 @@ class ToCSV:
 
     def write_to_csv(self, content):
         date = datetime.now()
-        unix = datetime.now().timestamp()
+        unix = int(datetime.now().timestamp())
         date = "-".join([str(date.year), str(date.month), str(date.day)])
-        with open(date + ".csv", "a") as output:
+        with open("media/" + date + ".csv", "a+") as output:
             output.write(f"{unix}, {content}")
+            output.write("\n")

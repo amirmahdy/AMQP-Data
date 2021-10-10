@@ -27,7 +27,6 @@ def singleton(class_):
 @singleton
 class RabbitListener:
     def __init__(self):
-        print("back_listener *** 15540")
         self.connection = None
         self.channel = None
         self.try_connection()
@@ -49,9 +48,10 @@ class RabbitListener:
             except Exception as e:
                 time.sleep(5)
 
-        # to_csv = ToCSV()
+        to_csv = ToCSV()
+
         def callback(ch, method, properties, body):
-            # to_csv.write_to_csv(body.decode())
+            to_csv.write_to_csv(body.decode())
             print("%r" % body.decode())
 
         self.channel.basic_consume(
