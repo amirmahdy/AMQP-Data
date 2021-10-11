@@ -8,3 +8,4 @@ celery
 redis
 channels_redis
 django_redis
+pandas

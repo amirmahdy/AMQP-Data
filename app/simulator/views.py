@@ -4,15 +4,19 @@ from datetime import datetime, timedelta
 import csv
 import re
 from os.path import exists
+from mobility.settings import TIME_ZONE
+import pandas as pd
 
 
 class Index(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'simulator/chart.html')
+        return render(request, 'simulator/chart.html', {"TIME_ZONE": TIME_ZONE})
 
     def post(self, request, *args, **kwargs):
-        data = []
+        df = None
+        statistics = {}
+
         start_time = request.data['startDatePicker']
         end_time = request.data['endDatePicker']
 
@@ -22,11 +26,13 @@ class Index(GenericAPIView):
         if start_time == []:
             alarm = True
             state = "Start date must be provided"
-            return render(request, 'simulator/chart.html', {"alarm": alarm, "state": state})
+            return render(request, 'simulator/chart.html', {"alarm": alarm, "state": state, "TIME_ZONE": TIME_ZONE})
 
+        start_time = start_time.pop()
         if end_time == []:
-            start_time = start_time.pop()
             end_time = start_time
+        else:
+            end_time = end_time.pop()
 
         start_time = datetime.strptime(start_time, '%Y-%m-%d')
         end_time = datetime.strptime(end_time, '%Y-%m-%d')
@@ -37,11 +43,17 @@ class Index(GenericAPIView):
             if not exists(f'media/{cur_time}.csv'):
                 alarm = True
                 state = "File not found. Hint*(System time zone is not the same as the application)"
-                return render(request, 'simulator/chart.html', {"alarm": alarm, "state": state})
-            with open(f'media/{cur_time}.csv', 'rt') as f:
-                reader = csv.reader(f)
-                reader = [[int(row[0]) * 1000, int(row[1])] for row in reader if row]
-                data += reader
+                return render(request, 'simulator/chart.html', {"alarm": alarm, "state": state, "TIME_ZONE": TIME_ZONE})
+            df = pd.concat([df, pd.read_csv(f'media/{cur_time}.csv', header=None)])
+
             start_time += delta
 
-        return render(request, 'simulator/chart.html', {"data": data})
+        df[0] = df[0] * 1000
+        statistics['count'] = df[1].describe()['count']
+        statistics['mean'] = df[1].describe()['mean']
+        statistics['min'] = df[1].describe()['min']
+        statistics['max'] = df[1].describe()['max']
+        statistics['std'] = df[1].describe()['std']
+
+        return render(request, 'simulator/chart.html',
+                      {"data": df.values.tolist(), "TIME_ZONE": TIME_ZONE, "statistics": statistics})

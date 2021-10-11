@@ -40,6 +40,29 @@
                 </div>
                 <input type="submit" class="btn btn-primary" value="Submit">
             </form>
+            {% if statistics %}
+            <div class="row">
+                <div class='col-md-12'>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Type</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for key, value in statistics.items %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
     </div>
 </div>
@@ -47,6 +70,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
 <script src="https://cdn.jsdelivr.net/momentjs/2.14.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.13/moment-timezone-with-data-2012-2022.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datepicker.min.js"></script>
 <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -85,17 +109,20 @@
 </script>
 <script>
     var data = {
-        "pv": {{ data }}
+        "pv": {{data}}
     }
-
     var options = {
         chart: {renderTo: 'graph'},
         xAxis: {type: 'datetime'},
         series: [],
         title: {
-            text: 'Mobility-house',
+            text: 'Mobility-house Time-Zone: {{TIME_ZONE}}',
             align: 'center',
         },
+
+        time: {
+            timezone: '{{ TIME_ZONE }}'
+        }
 
     };
 

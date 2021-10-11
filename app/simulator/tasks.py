@@ -33,6 +33,7 @@ class RabbitListener:
 
     def try_connection(self):
         try:
+            print("Retry connection")
             crd = pika.PlainCredentials(username=env("RABBIT_USER"), password=env("RABBIT_PASS"))
             self.connection = pika.BlockingConnection(
                 pika.ConnectionParameters(host="rabbitmq", port=5672, credentials=crd))
@@ -66,12 +67,18 @@ class RabbitListener:
         t1.start()
 
     def send_random_data(self):
+        # Separating connections for stopping AMQP connection heart-beat loss
         try:
+            crd = pika.PlainCredentials(username=env("RABBIT_USER"), password=env("RABBIT_PASS"))
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(host="rabbitmq", port=5672, credentials=crd))
+            channel = connection.channel()
+            channel.queue_declare(queue="simulator")
             rnd = random.randint(0, 9000)
-            self.channel.basic_publish(exchange='', routing_key='simulator', body=str(rnd).encode())
+            channel.basic_publish(exchange='', routing_key='simulator', body=str(rnd).encode())
+            connection.close()
         except Exception as e:
-            time.sleep(5)
-            self.try_connection()
+            pass
 
 
 @celeryd_init.connect
