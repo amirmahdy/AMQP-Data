@@ -12,6 +12,15 @@ env = environ.Env(
     SENTRY=(bool, False),
 )
 
+"""
+The singleton decorator avoids having multiple instances of the class, and the __init__ method gets called once.
+
+For decreasing the I/O usage, writing data into file, a buffer can be set to store a chunk of data. There is a drawback 
+in using buffer, which is loosing the data if the system fails to save the data, cases like power outage.
+
+In this project no buffer is foreseen .
+"""
+
 
 def singleton(class_):
     instances = {}
